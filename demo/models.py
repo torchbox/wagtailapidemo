@@ -13,6 +13,7 @@ from wagtail.wagtaildocs.edit_handlers import DocumentChooserPanel
 from wagtail.wagtailsnippets.models import register_snippet
 from wagtail.wagtailforms.models import AbstractEmailForm, AbstractFormField
 from wagtail.wagtailsearch import index
+from wagtail.wagtailimages.models import Image
 
 from modelcluster.fields import ParentalKey
 from modelcluster.tags import ClusterTaggableManager
@@ -725,3 +726,21 @@ FormPage.content_panels = [
         FieldPanel('subject', classname="full"),
     ], "Email")
 ]
+
+
+class DemoImage(Image):
+    @property
+    def fullwidth_url(self):
+        return generate_image_url(self, 'width-800')
+
+    @property
+    def halfwidth_url(self):
+        return generate_image_url(self, 'width-400')
+
+    api_fields = (
+        'fullwidth_url',
+        'halfwidth_url',
+    )
+
+    class Meta:
+        proxy = True
