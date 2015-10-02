@@ -3,9 +3,11 @@ from datetime import date
 from django.db import models
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.http import HttpResponse
+from django.dispatch import receiver
 
 from wagtail.wagtailcore.models import Page, Orderable
 from wagtail.wagtailcore.fields import RichTextField
+from wagtail.wagtailcore.signals import page_published
 from wagtail.wagtailadmin.edit_handlers import FieldPanel, MultiFieldPanel, \
     InlinePanel, PageChooserPanel
 from wagtail.wagtailimages.edit_handlers import ImageChooserPanel
@@ -758,3 +760,17 @@ class DemoImage(Image):
 
     class Meta:
         proxy = True
+
+
+@receiver(page_published, sender=BlogPage)
+@receiver(page_published, sender=EventPage)
+def send_push_notification_on_page_publish(sender, instance, **kwargs):
+    if not instance.exclude_from_api and instance.send_push_notification:
+        # SEND PUSH NOTIFICATION HERE
+
+        # Reset send_push_notification flag on latest revision (if its not in moderation)
+        revision = instance.get_latest_revision()
+        if revision and not revision.submitted_for_moderation:
+            rev_page = revision.as_page_object()
+            rev_page.send_push_notification = False
+            rev_page.save_revision(changed=False)
