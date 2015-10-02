@@ -390,6 +390,7 @@ class BlogPage(Page):
     )
 
     exclude_from_api = models.BooleanField(default=False)
+    send_push_notification = models.BooleanField(default=False)
 
     search_fields = Page.search_fields + (
         index.SearchField('body'),
@@ -429,6 +430,7 @@ BlogPage.promote_panels = Page.promote_panels + [
     ImageChooserPanel('feed_image'),
     FieldPanel('tags'),
     FieldPanel('exclude_from_api'),
+    FieldPanel('send_push_notification'),
 ]
 
 
@@ -641,6 +643,7 @@ class EventPage(Page):
     )
 
     exclude_from_api = models.BooleanField(default=False)
+    send_push_notification = models.BooleanField(default=False)
 
     search_fields = Page.search_fields + (
         index.SearchField('get_audience_display'),
@@ -714,6 +717,7 @@ EventPage.content_panels = [
 EventPage.promote_panels = Page.promote_panels + [
     ImageChooserPanel('feed_image'),
     FieldPanel('exclude_from_api'),
+    FieldPanel('send_push_notification'),
 ]
 
 
