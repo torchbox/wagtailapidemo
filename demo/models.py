@@ -99,6 +99,25 @@ class ContactFields(models.Model):
         abstract = True
 
 
+class APIConfigurationFieldsMixin(models.Model):
+    exclude_from_api = models.BooleanField(default=False)
+
+    search_fields = (
+        index.FilterField('exclude_from_api'),
+    )
+
+    panels = [
+        FieldPanel('exclude_from_api'),
+    ]
+
+    api_fields = (
+        'exclude_from_api',
+    )
+
+    class Meta:
+        abstract = True
+
+
 # Carousel items
 
 class CarouselItem(LinkFields):
@@ -192,18 +211,18 @@ class HomePageRelatedLink(Orderable, RelatedLink):
     page = ParentalKey('demo.HomePage', related_name='related_links')
 
 
-class HomePage(Page):
+class HomePage(APIConfigurationFieldsMixin, Page):
     body = RichTextField(blank=True)
 
     search_fields = Page.search_fields + (
         index.SearchField('body'),
-    )
+    )  + APIConfigurationFieldsMixin.search_fields
 
     api_fields = (
         'body',
         'carousel_items',
         'related_links',
-    )
+    ) + APIConfigurationFieldsMixin.api_fields
 
     class Meta:
         verbose_name = "Homepage"
@@ -215,7 +234,9 @@ HomePage.content_panels = [
     InlinePanel('related_links', label="Related links"),
 ]
 
-HomePage.promote_panels = Page.promote_panels
+HomePage.promote_panels = Page.promote_panels + [
+    MultiFieldPanel(APIConfigurationFieldsMixin.panels, "API")
+]
 
 
 # Standard index page
@@ -224,7 +245,7 @@ class StandardIndexPageRelatedLink(Orderable, RelatedLink):
     page = ParentalKey('demo.StandardIndexPage', related_name='related_links')
 
 
-class StandardIndexPage(Page):
+class StandardIndexPage(APIConfigurationFieldsMixin, Page):
     intro = RichTextField(blank=True)
     feed_image = models.ForeignKey(
         'wagtailimages.Image',
@@ -236,13 +257,13 @@ class StandardIndexPage(Page):
 
     search_fields = Page.search_fields + (
         index.SearchField('intro'),
-    )
+    ) + APIConfigurationFieldsMixin.search_fields
 
     api_fields = (
         'intro',
         'feed_image',
         'related_links',
-    )
+    ) + APIConfigurationFieldsMixin.api_fields
 
 StandardIndexPage.content_panels = [
     FieldPanel('title', classname="full title"),
@@ -252,6 +273,7 @@ StandardIndexPage.content_panels = [
 
 StandardIndexPage.promote_panels = Page.promote_panels + [
     ImageChooserPanel('feed_image'),
+    MultiFieldPanel(APIConfigurationFieldsMixin.panels, "API"),
 ]
 
 
@@ -265,7 +287,7 @@ class StandardPageRelatedLink(Orderable, RelatedLink):
     page = ParentalKey('demo.StandardPage', related_name='related_links')
 
 
-class StandardPage(Page):
+class StandardPage(APIConfigurationFieldsMixin, Page):
     intro = RichTextField(blank=True)
     body = RichTextField(blank=True)
     feed_image = models.ForeignKey(
@@ -279,7 +301,7 @@ class StandardPage(Page):
     search_fields = Page.search_fields + (
         index.SearchField('intro'),
         index.SearchField('body'),
-    )
+    ) + APIConfigurationFieldsMixin.search_fields
 
     api_fields = (
         'intro',
@@ -287,7 +309,7 @@ class StandardPage(Page):
         'feed_image',
         'carousel_items',
         'related_links',
-    )
+    ) + APIConfigurationFieldsMixin.api_fields
 
 StandardPage.content_panels = [
     FieldPanel('title', classname="full title"),
@@ -299,6 +321,7 @@ StandardPage.content_panels = [
 
 StandardPage.promote_panels = Page.promote_panels + [
     ImageChooserPanel('feed_image'),
+    MultiFieldPanel(APIConfigurationFieldsMixin.panels, "API"),
 ]
 
 
@@ -308,17 +331,17 @@ class BlogIndexPageRelatedLink(Orderable, RelatedLink):
     page = ParentalKey('demo.BlogIndexPage', related_name='related_links')
 
 
-class BlogIndexPage(Page):
+class BlogIndexPage(APIConfigurationFieldsMixin, Page):
     intro = RichTextField(blank=True)
 
     search_fields = Page.search_fields + (
         index.SearchField('intro'),
-    )
+    ) + APIConfigurationFieldsMixin.search_fields
 
     api_fields = (
         'intro',
         'related_links',
-    )
+    ) + APIConfigurationFieldsMixin.api_fields
 
     @property
     def blogs(self):
@@ -360,7 +383,9 @@ BlogIndexPage.content_panels = [
     InlinePanel('related_links', label="Related links"),
 ]
 
-BlogIndexPage.promote_panels = Page.promote_panels
+BlogIndexPage.promote_panels = Page.promote_panels + [
+    MultiFieldPanel(APIConfigurationFieldsMixin.panels, "API"),
+]
 
 
 # Blog page
@@ -377,7 +402,7 @@ class BlogPageTag(TaggedItemBase):
     content_object = ParentalKey('demo.BlogPage', related_name='tagged_items')
 
 
-class BlogPage(Page):
+class BlogPage(APIConfigurationFieldsMixin, Page):
     body = RichTextField()
     tags = ClusterTaggableManager(through=BlogPageTag, blank=True)
     date = models.DateField("Post date")
@@ -391,7 +416,7 @@ class BlogPage(Page):
 
     search_fields = Page.search_fields + (
         index.SearchField('body'),
-    )
+    ) + APIConfigurationFieldsMixin.search_fields
 
     api_fields = (
         'body',
@@ -401,7 +426,7 @@ class BlogPage(Page):
         'feed_image_url',
         'carousel_items',
         'related_links',
-    )
+    ) + APIConfigurationFieldsMixin.api_fields
 
     @property
     def feed_image_url(self):
@@ -424,6 +449,7 @@ BlogPage.content_panels = [
 BlogPage.promote_panels = Page.promote_panels + [
     ImageChooserPanel('feed_image'),
     FieldPanel('tags'),
+    MultiFieldPanel(APIConfigurationFieldsMixin.panels, "API"),
 ]
 
 
@@ -433,7 +459,7 @@ class PersonPageRelatedLink(Orderable, RelatedLink):
     page = ParentalKey('demo.PersonPage', related_name='related_links')
 
 
-class PersonPage(Page, ContactFields):
+class PersonPage(APIConfigurationFieldsMixin, Page, ContactFields):
     first_name = models.CharField(max_length=255)
     last_name = models.CharField(max_length=255)
     intro = RichTextField(blank=True)
@@ -458,7 +484,7 @@ class PersonPage(Page, ContactFields):
         index.SearchField('last_name'),
         index.SearchField('intro'),
         index.SearchField('biography'),
-    )
+    ) + APIConfigurationFieldsMixin.search_fields
 
     api_fields = (
         'first_name',
@@ -471,7 +497,7 @@ class PersonPage(Page, ContactFields):
         'feed_image_url',
     ) + ContactFields.api_fields + (
         'related_links',
-    )
+    ) + APIConfigurationFieldsMixin.api_fields
 
     @property
     def image_url(self):
@@ -496,12 +522,13 @@ PersonPage.content_panels = [
 
 PersonPage.promote_panels = Page.promote_panels + [
     ImageChooserPanel('feed_image'),
+    MultiFieldPanel(APIConfigurationFieldsMixin.panels, "API"),
 ]
 
 
 # Contact page
 
-class ContactPage(Page, ContactFields):
+class ContactPage(APIConfigurationFieldsMixin, Page, ContactFields):
     body = RichTextField(blank=True)
     feed_image = models.ForeignKey(
         'wagtailimages.Image',
@@ -513,12 +540,12 @@ class ContactPage(Page, ContactFields):
 
     search_fields = Page.search_fields + (
         index.SearchField('body'),
-    )
+    ) + APIConfigurationFieldsMixin.search_fields
 
     api_fields = (
         'body',
         'feed_image',
-    ) + ContactFields.api_fields
+    ) + ContactFields.api_fields + APIConfigurationFieldsMixin.api_fields
 
 ContactPage.content_panels = [
     FieldPanel('title', classname="full title"),
@@ -528,6 +555,7 @@ ContactPage.content_panels = [
 
 ContactPage.promote_panels = Page.promote_panels + [
     ImageChooserPanel('feed_image'),
+    MultiFieldPanel(APIConfigurationFieldsMixin.panels, "API"),
 ]
 
 
@@ -537,17 +565,17 @@ class EventIndexPageRelatedLink(Orderable, RelatedLink):
     page = ParentalKey('demo.EventIndexPage', related_name='related_links')
 
 
-class EventIndexPage(Page):
+class EventIndexPage(APIConfigurationFieldsMixin, Page):
     intro = RichTextField(blank=True)
 
     search_fields = Page.search_fields + (
         index.SearchField('intro'),
-    )
+    ) + APIConfigurationFieldsMixin.search_fields
 
     api_fields = (
         'intro',
         'related_links',
-    )
+    ) + APIConfigurationFieldsMixin.api_fields
 
     @property
     def events(self):
@@ -569,7 +597,9 @@ EventIndexPage.content_panels = [
     InlinePanel('related_links', label="Related links"),
 ]
 
-EventIndexPage.promote_panels = Page.promote_panels
+EventIndexPage.promote_panels = Page.promote_panels + [
+    MultiFieldPanel(APIConfigurationFieldsMixin.panels, "API"),
+]
 
 
 # Event page
@@ -612,7 +642,7 @@ class EventPageSpeaker(Orderable, LinkFields):
     ]
 
 
-class EventPage(Page):
+class EventPage(APIConfigurationFieldsMixin, Page):
     date_from = models.DateField("Start date")
     date_to = models.DateField(
         "End date",
@@ -639,7 +669,7 @@ class EventPage(Page):
         index.SearchField('get_audience_display'),
         index.SearchField('location'),
         index.SearchField('body'),
-    )
+    ) + APIConfigurationFieldsMixin.search_fields
 
     api_fields = (
         'date_from',
@@ -656,7 +686,7 @@ class EventPage(Page):
         'speakers',
         'carousel_items',
         'related_links',
-    )
+    ) + APIConfigurationFieldsMixin.api_fields
 
     @property
     def feed_image_url(self):
@@ -704,6 +734,7 @@ EventPage.content_panels = [
 
 EventPage.promote_panels = Page.promote_panels + [
     ImageChooserPanel('feed_image'),
+    MultiFieldPanel(APIConfigurationFieldsMixin.panels, "API"),
 ]
 
 
