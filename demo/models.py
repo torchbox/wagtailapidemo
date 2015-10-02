@@ -389,8 +389,11 @@ class BlogPage(Page):
         related_name='+'
     )
 
+    exclude_from_api = models.BooleanField(default=False)
+
     search_fields = Page.search_fields + (
         index.SearchField('body'),
+        index.FilterField('exclude_from_api'),
     )
 
     api_fields = (
@@ -401,6 +404,7 @@ class BlogPage(Page):
         'feed_image_url',
         'carousel_items',
         'related_links',
+        'exclude_from_api',
     )
 
     @property
@@ -424,6 +428,7 @@ BlogPage.content_panels = [
 BlogPage.promote_panels = Page.promote_panels + [
     ImageChooserPanel('feed_image'),
     FieldPanel('tags'),
+    FieldPanel('exclude_from_api'),
 ]
 
 
@@ -635,10 +640,13 @@ class EventPage(Page):
         related_name='+'
     )
 
+    exclude_from_api = models.BooleanField(default=False)
+
     search_fields = Page.search_fields + (
         index.SearchField('get_audience_display'),
         index.SearchField('location'),
         index.SearchField('body'),
+        index.FilterField('exclude_from_api'),
     )
 
     api_fields = (
@@ -656,6 +664,7 @@ class EventPage(Page):
         'speakers',
         'carousel_items',
         'related_links',
+        'exclude_from_api',
     )
 
     @property
@@ -704,6 +713,7 @@ EventPage.content_panels = [
 
 EventPage.promote_panels = Page.promote_panels + [
     ImageChooserPanel('feed_image'),
+    FieldPanel('exclude_from_api'),
 ]
 
 
