@@ -11,6 +11,8 @@ from wagtail.contrib.wagtailapi import urls as wagtailapi_urls
 
 from demo import views
 
+from apns import urls as apns_urls
+
 
 urlpatterns = [
     url(r'^django-admin/', include(admin.site.urls)),
@@ -19,10 +21,13 @@ urlpatterns = [
     url(r'^documents/', include(wagtaildocs_urls)),
     url(r'^images/(.*)/(\d*)/([^/]*)/.*$', serve_image, name='wagtailimages_serve'),
 
-    url(r'search/$', views.search, name='search'),
+    url(r'^search/$', views.search, name='search'),
 
     # Wagtail API
-    url(r'api/', include(wagtailapi_urls)),
+    url(r'^api/', include(wagtailapi_urls)),
+
+    # APNs device registration
+    url(r'^apns/', include(apns_urls, namespace='apns')),
 
     # For anything not caught by a more specific rule above, hand over to
     # Wagtail's serving mechanism

@@ -165,6 +165,7 @@ INSTALLED_APPS = (
     'wagtail.contrib.wagtailapi',
 
     'demo',
+    'apns',
 )
 
 # Add wagtail.contrib.wagtailsearchpromotions to INSTALLED_APPS
